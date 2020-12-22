@@ -18,19 +18,23 @@ def init_browser():
     return Browser("chrome", **executable_path, headless = False)
 
 def scrape():
+    #browser = init_browser()
+    browser = Browser("chrome",executable_path="chromedriver", headless = False)
+
     mars_data = {}
-    news_output = scrape_news_info()
-    mars_data["mars_news"] = news_output[0]
-    mars_data["mars_paragraph"] = news_output[1]
-    mars_data["mars_image"] = scrape_image_info()
-    mars_data["mars_facts"] = scrape_facts_info()
-    mars_data["mars_hemisphere"] = scrape_mars_hemisphere()
-   
+    news_t, news_p = scrape_news_info(browser)
+    mars_data["mars_news"] = news_t
+    mars_data["mars_paragraph"] = news_p
+    mars_data["mars_image"] = scrape_image_info(browser)
+    mars_data["mars_facts"] = scrape_facts_info(browser)
+    mars_data["mars_hemisphere"] = scrape_mars_hemisphere(browser)
+    
+    
     return mars_data
 
 
-def scrape_news_info():
-    browser = init_browser()
+def scrape_news_info(browser):
+    #browser = init_browser()
     
     #visit "https://mars.nasa.gov/news/"
     nasa_url = "https://mars.nasa.gov/news/"
@@ -45,16 +49,17 @@ def scrape_news_info():
     #latest News Title and Paragraph Text
     latest_news_title  = nasa_soup.find("div", class_='list_text')
 
-    list_date = latest_news_title.find("div", class_="list_date").text
+   # list_date = latest_news_title.find("div", class_="list_date").text
     news_title = latest_news_title.find("div", class_="content_title").text
     news_paragraph = latest_news_title.find("div", class_ ="article_teaser_body").text
-
-    return(list_date,news_title,news_paragraph)
+    
+    
+    return(news_title,news_paragraph)
 
 # JPL Mars Space Images - Featured Image
 #URL of page to be scraped
-def scrape_image_info():
-    browser = init_browser()
+def scrape_image_info(browser):
+    #browser = init_browser()
     jpl_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(jpl_url)
     time.sleep(1)
@@ -63,13 +68,13 @@ def scrape_image_info():
 
     image = jpl_img_soup.find("img", class_="thumb")["src"]
     featured_image_url = "https://www.jpl.nasa.gov" + image
-
-    return(image,featured_image_url)
+   
+    return(featured_image_url)
 
 
 # ### Mars Facts
-def scrape_facts_info():
-    browser = init_browser()
+def scrape_facts_info(browser):
+    #browser = init_browser()
     mars_facts_url = 'https://space-facts.com/mars/'
     browser.visit(mars_facts_url)
     time.sleep(1)
@@ -82,12 +87,14 @@ def scrape_facts_info():
  
     #Use Pandas to convert the data to a HTML table string.
     mars_facts_html = mars_facts_df.to_html(header = False, index = False)
+    
+    
     return(mars_facts_html)
 
 # ### Mars Hemispheres
 #visit url
-def scrape_mars_hemisphere():
-    browser = init_browser()
+def scrape_mars_hemisphere(browser):
+    #browser = init_browser()
     mars_hemisphere_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
     browser.visit(mars_hemisphere_url)
     time.sleep(1)
@@ -110,5 +117,5 @@ def scrape_mars_hemisphere():
         image_url = downloads.find("a")["href"]
         mars_hemisphere.append({"title": title, "img_url": image_url})
 
-
+    
     return mars_hemisphere

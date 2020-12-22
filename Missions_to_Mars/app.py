@@ -28,7 +28,7 @@ def scrape():
     
     # Find one record of data from the mongo database
     mars = mongo.db.mars 
-    
+
     # Run the scrape function
     mars_data = scrape_mars_new2.scrape()
 
